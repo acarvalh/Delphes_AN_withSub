@@ -1,4 +1,18 @@
 /////////////////////////////////
+const int nfiles=5; 
+string file[5] = {"pp_RS_WW_jj1.5tev30k", 
+    "pp_RS_ww_semilep_1.5tev30k",
+    "pp_bulk_WW_jj1.5tev30k",
+    "pp_bulk_ww_semilep_1.5tev30k",
+    "pp_bulk_WW_jj1.5tev30k_PU22_uncersioned"
+};
+const char* Mass[5] = {"Control_pp_RS_WW_jj1.5tev30k.root", 
+    "Control_pp_RS_ww_semilep_1.5tev30k.root",
+    "Control_pp_bulk_WW_jj1.5tev30k.root",
+    "Control_pp_bulk_ww_semilep_1.5tev30k.root",
+    "pp_bulk_WW_jj1.5tev30k_PU22_uncersioned.root"
+};
+/////////////////////////////////
 // cuts
 //double weight =1.;///10000;//0.001;//
 double Mjj =0;//400; 

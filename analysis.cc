@@ -12,6 +12,9 @@
  make analysis.exe
  ./analysis.exe 
 ******************************************************************************/
+// git branch VVcombo
+// git checkout VVcombo
+// git push origin VVcombo
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -77,24 +80,34 @@ int save_hist(int,int,int,bool);
 //namespace po = boost::program_options; // to option in prompt, ble!
 ////////////////////////////////////////////////////
 int main(){
- 
- std::string inputfile = "/Users/Xanda/Documents/codes/VVcombo/lhe/pp_RS_WW_jj1.5tev30k.root"; // to loop, to make automatic
+ string path = "/Users/Xanda/Documents/codes/VVcombo/lhe/"; // to loop, to make automatic
+ string inputfile; string end = ".root";
+ for (unsigned i=4 ; i< nfiles; i++) {
+ inputfile= path + file[i] + end;
+ cout<<"reading from: "<< inputfile<< endl;
  decla(0);   
- 
+    //return 0;
  TChain *chain = new TChain("Delphes");
  chain->Add(inputfile.c_str());      
  ExRootTreeReader *treeReader = new ExRootTreeReader(chain);
  //---- objects in Delphes format 
- TClonesArray *branchJet = treeReader->UseBranch("Jet");
+ TClonesArray *branchJet = treeReader->UseBranch("Jet"); // have nsub
  TClonesArray *branchElectron = treeReader->UseBranch("Electron");
  TClonesArray *branchMuon = treeReader->UseBranch("Muon");
  TClonesArray *branchMissingET = treeReader->UseBranch("MissingET");
  TClonesArray *branchPhoton = treeReader->UseBranch("Photon");
  TClonesArray *branchParticle = treeReader->UseBranch("Particle");
- //---- to access constituents
+ //---- to access constituents -- not from the jet
  TClonesArray *branchEFlowTrack = treeReader->UseBranch("EFlowTrack");
- TClonesArray *branchEFlowTower = treeReader->UseBranch("EFlowTower");
- TClonesArray *branchEFlowMuon = treeReader->UseBranch("EFlowMuon");
+ TClonesArray *brancheflowPhoton = treeReader->UseBranch("EFlowPhoton");
+ TClonesArray *EFlowNeutralHadron = treeReader->UseBranch("EFlowNeutralHadron");
+     //TClonesArray *branchEFlowTower = treeReader->UseBranch("EFlowTower");
+// TClonesArray *branchEFlowMuon = treeReader->UseBranch("EFlowMuon");
+ // to PU
+//     add Branch Calorimeter/eflowTracks EFlowTrack Track
+//     add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
+//     add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
+     
  //---- events
  Long64_t allEntries = treeReader->GetEntries();
  std::cout << "** Chain contains " << allEntries << " events" << std::endl;
@@ -105,15 +118,17 @@ int main(){
    TLorentzVector l1, l2; // save leptons to compare to jets -- double counted as jets
    //TLorentzVector pho1, pho2; // save to compare to jets
    //std::vector<TLorentzVector> Jets; // all the jets 
-   bool findjetSub = myJetCollection(branchEFlowTrack, branchEFlowTower, branchEFlowMuon , branchJet); 
+   bool findjetSub = myJetCollection(branchEFlowTrack, brancheflowPhoton, EFlowNeutralHadron , branchJet); 
  } // close loop entry
- save_hist(1,1,1,1);
+ save_hist(i,1,1,1);
+ } // close for file
  return 0;
 } // close main
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *branchEFlowTower, TClonesArray *branchEFlowMuon , TClonesArray *branchJet ){
+bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPhoton, TClonesArray *EFlowNeutralHadron , TClonesArray *branchJet ){
+    // brancheflowPhoton, EFlowNeutralHadron , branchJet
     TObject *object;
     vector<PseudoJet> jets_CA;
     Jet *jetAll; // P4 returns a TLorentzVector
@@ -189,6 +204,33 @@ bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *branchEFlowTo
         J1pt->Fill(jets_CA.at(0).pt());
         J2pt->Fill(jets_CA.at(1).pt());
     }  
+    ////////////////////////////////////////////////////
+    // pure constituents instead
+    vector<PseudoJet> jets_pure;
+    TLorentzVector particles_pure;
+    //cout<<" all tracks "<< branchEFlowTrack->GetEntriesFast() << endl; // check with isol leptons
+    Track *track; // P4 returns a TLorentzVector
+    for(i = 0; i < branchEFlowTrack->GetEntriesFast(); i++) {
+        // implememnt check iso lepton
+        track = (Track*) branchEFlowTrack->At(i);
+        double pts = track->PT;
+        double etas = track->Eta;
+        double phis=track->Phi;
+        double masse= 0; //track->Mass;
+        particles_pure.SetPtEtaPhiM(pts,etas,phis,masse); // this is insane!
+        jets_pure.push_back(fastjet::PseudoJet(particles_pure.Px(),particles_pure.Py(),particles_pure.Pz(),particles_pure.E()));
+    }
+    Tower *tower; // P4 returns a TLorentzVector
+    for(i = 0; i < brancheflowPhoton->GetEntriesFast(); i++) {
+        tower = (Tower*) brancheflowPhoton->At(i);
+        double pts = tower->PT;
+        double etas = tower->Eta;
+        double phis=tower->Phi;
+        double masse= 0; //track->Mass;
+        particles_pure.SestPtEtaPhiM(pts,etas,phis,masse); // this is insane!
+        jets_pure.push_back(fastjet::PseudoJet(particles_pure.Px(),particles_pure.Py(),particles_pure.Pz(),particles_pure.E()));
+    }
+    
     /* if(some>0) {
         // define CA jet in the Delphes card
         // ATLAS TAG
@@ -411,11 +453,16 @@ bool isThisJetALepton(TLorentzVector* jet, TLorentzVector* l1, TLorentzVector* l
 /////////////////////////////////////////////////////////////////////////
 // save the histos
 int save_hist(int isample,int reco,int sample, bool shower){
-    const char* Mass;
-    Mass = Form("Control_pp_RSy_WW_jj1.5tev30k%d.root",reco); 
-    cout<<" saved "<< Form("Control_pp_RSy_WW_jj1.5tev30k%d.root",reco)<<endl;
-    TFile f1(Mass, "recreate");
-    f1.cd();
+    //const char* Mass;
+    //const char* Masse = "teste";
+    //printf("%d + %d", Mass, Masse);
+    //Mass = Form("Control_pp_RSy_WW_jj1.5tev30k%d.root",isample); 
+    //cout<<" saved "<< Form("Control_pp_RSy_WW_jj1.5tev30k%d.root",reco)<<endl;
+    //string Mass = "teste.root";
+    //TFile f1(Mass, "recreate");
+    TFile  *f1 = new TFile(Mass[isample], "RECREATE");
+    cout<<"saved = "<<Mass[isample]<<endl;
+    f1->cd();
     Njets_passing_kLooseID->Write();
     Nlep_passing_kLooseID->Write();
     PrunMass->Write();
@@ -426,7 +473,7 @@ int save_hist(int isample,int reco,int sample, bool shower){
     J2eta->Write();
     J1pt->Write();
     J2pt->Write();
-    f1.Close();    
+    f1->Close();    
     return 0;
 }
 /////////////////////////////////////////////////////////////////////////
