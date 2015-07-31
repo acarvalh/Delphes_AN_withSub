@@ -1,60 +1,72 @@
 /////////////////////////////////
-const int nfiles=5; 
-string file[5] = {"pp_RS_WW_jj1.5tev30k", 
-    "pp_RS_ww_semilep_1.5tev30k",
-    "pp_bulk_WW_jj1.5tev30k",
+const int nfiles=6; 
+// selections: 0 = CMS JJ ; 1 = CMS Jlnu ; 2 = CMS Jll 
+string file[6] = {"pp_bulk_WW_jj1.5tev30k_PU22_versioned", 
+    "pp_bulk_WW_semilep1.5tev30k_PU22_versioned",
+    "pp_RSy_ZZ_llj1.5tev30k_PU22_versioned",
     "pp_bulk_ww_semilep_1.5tev30k",
-    "pp_bulk_WW_jj1.5tev30k_PU22_uncersioned"
+    "pp_bulk_WW_jj1.5tev30k_PU22_uncersioned",
+    "pp_RSy_WW_jj1.5tev30k_PU22_uncersioned"
 };
-const char* Mass[5] = {"Control_pp_RS_WW_jj1.5tev30k.root", 
-    "Control_pp_RS_ww_semilep_1.5tev30k.root",
-    "Control_pp_bulk_WW_jj1.5tev30k.root",
+const char* Mass[6] = {"Control_pp_bulk_WW_jj1.5tev30k_PU22_versioned.root", 
+    "Control_pp_bulk_WW_semilep1.5tev30k_PU22_versioned.root",
+    "Control_pp_RSy_ZZ_llj1.5tev30k_PU22_versioned.root",
     "Control_pp_bulk_ww_semilep_1.5tev30k.root",
-    "pp_bulk_WW_jj1.5tev30k_PU22_uncersioned.root"
+    "Control_pp_bulk_WW_jj1.5tev30k_PU22_uncersioned.root",
+    "Control_pp_RSy_WW_jj1.5tev30k_PU22_uncersioned"
 };
+ double const selections[6] = {0 , 1, 2}; // see cuts.h
 /////////////////////////////////
 // cuts
 //double weight =1.;///10000;//0.001;//
-double Mjj =0;//400; 
-double PTjj = 0;//400; 
-double DeltayVBF = 0;//3;
-double DeltaRVBF = 0;//3;
 bool shower=true;
 // To be applied only to hadron level events
 //
-double const genmasshad=2000; // genmass
-double const genmasshadmin=0; // genmass
-//
-double const genmasslep=2000; // genmass
-double const genmasslepmin=0; // genmass
-// the gen-level cuts
-double const bjetpt = 30.0; 
-double const mbblow = 0.0; 
-// basline
-double const jet_ptmin=20.0; // parton for jet reconstruction
-double const jet_ptminfinal=1.0; // in final jet reconstruction
-double const rapmax=5.0; // for jet reconstruction
-double const etab = 2.5;
-double const etal = 25;
-double const etaj=5;
-double const RR =0.5;
+// objets deffinition
+double const jet_ptmin=30.0; // parton for jet reconstruction
+double const const_ptmin=0; // parton for jet reconstruction
+double const rapmax=2.5; // for jet reconstruction
+double const etaj = 2.5;
+double const etal = 2.5;
 double const ptlepton = 20.;
-double const lepiso = 0.3;
-double Deltay = 1.3;//3; // not yet
+double const lepiso = 0.8;
+////////////////////////////////////
 // analysis cuts
-double const mblcut = 190;
-int const cat =2; // minimum number of btag
-////////////////////////////////////////
-// weights b-tag
-double const subjet2b=1;
-double const fatjet2b=1;
-double const normalb=1;
-double const normalc=1;
-double const normall=1;
-double const misb=1;
-/////////////////////////////////////////
+// CMS JJ - selection 0
+double const Deltay = 1.3;//3;
+double const Mvvjj =0;//890;//400;
+// CMS Jlnu - selection 1
+double const etaJ = 2.4; 
+double const Mvvlnuj =700;//400; 
+double const METenuJ =40;//400; 
+double const METmunuJ =80;//400;
+double const ptVlnu = 200; 
+double const ptE = 90; 
+double const ptMu = 50; 
+double const etaE = 2.5; 
+double const etaMu = 2.1; 
+// CMS Jll - selection 2
+double const Mvvllj =500;//400; 
+double const ptVll = 80; 
 ///////////////////////////////////
 // for substructure
+// nsubjetiness - unnormalized measure
+double const beta1 = 1.0;
+double const R0=0.8; 
+double const tau21_LP = 0.5;
+double const tau21_HP = 0.75;
+// prunning
+double const zcut = 0.1;
+double const Rcut_factor =0.8;
+//
+double const mprunjj_min = 70;
+double const mprunjj_max = 100;
+//
+double const mprunjlnu_min = 65;
+double const mprunjlnu_max = 105;
+//
+double const mprunjll_min = 70;
+double const mprunjll_max = 110;
 // mass drop
 double const Rsb = 0.8; // CA recluster
 double const mu = 0.67;
@@ -64,8 +76,6 @@ double const Mfat =100;
 double const Rfilt = 0.1;
 int const n_subjet =3;
 //
-double const zcut = 0.1;
-double const Rcut_factor =0.8;
 /////////////////////////////////////////
 // smear
 bool smear= false;

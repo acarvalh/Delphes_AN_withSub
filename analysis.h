@@ -27,6 +27,7 @@
  MissingET *met;
  Track *track;
  Tower *tower;
+ Tower *towepdr;
  TObject *object;
 
  Float_t Eem, Ehad;
