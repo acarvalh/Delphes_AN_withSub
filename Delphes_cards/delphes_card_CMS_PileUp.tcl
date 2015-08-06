@@ -435,8 +435,8 @@ module FastJetFinder GenJetFinder {
   set OutputArray jets
 
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
-  set JetAlgorithm 6
-  set ParameterR 0.5
+  set JetAlgorithm 5
+  set ParameterR 0.8
 
   set JetPTMin 20.0
 }
@@ -572,7 +572,7 @@ module Isolation ElectronIsolation {
 
   set OutputArray electrons
 
-  set DeltaRMax 0.5
+  set DeltaRMax 0.01
 
   set PTMin 0.5
 
@@ -609,7 +609,7 @@ module Isolation MuonIsolation {
 
   set OutputArray muons
 
-  set DeltaRMax 0.5
+  set DeltaRMax 0.01
 
   set PTMin 0.5
 
@@ -725,9 +725,11 @@ module TreeWriter TreeWriter {
 #  add Branch TrackMerger/tracks Track Track
 #  add Branch Calorimeter/towers Tower Tower
 
-#  add Branch Calorimeter/eflowTracks EFlowTrack Track
-#  add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
-#  add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
+  add Branch Calorimeter/eflowTracks EFlowTrack Track
+  add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
+  add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
+#  add Branch Calorimeter/eflowNeutralHadrons EFlowMuon Tower
+# merged with eflowtrack
 
   add Branch GenJetFinder/jets GenJet Jet
   add Branch UniqueObjectFinder/jets Jet Jet

@@ -1,21 +1,22 @@
 /////////////////////////////////
 const int nfiles=6; 
 // selections: 0 = CMS JJ ; 1 = CMS Jlnu ; 2 = CMS Jll 
-string file[6] = {"pp_bulk_WW_jj1.5tev30k_PU22_versioned", 
-    "pp_bulk_WW_semilep1.5tev30k_PU22_versioned",
-    "pp_RSy_ZZ_llj1.5tev30k_PU22_versioned",
-    "pp_bulk_ww_semilep_1.5tev30k",
-    "pp_bulk_WW_jj1.5tev30k_PU22_uncersioned",
+// selections: 3 = ATLAS JJ ; 4 = ATLAS Jlnu ; 5 = ATLAS Jll 
+string file[6] = {"bulk/pp_bulk_WW_jj1.5tev30k_PU22_versioned", 
+    "bulk/pp_bulk_WW_semilep1.5tev30k_PU22_versioned",
+    "bulk/pp_bulk_ZZ_llj1.5tev30k_PU22_versioned",
+    "RS/pp_RS_WW_jj1.5tev30k_PU22_versioned",
+    "RS/pp_RS_ww_semilep1.5tev30k_PU22_versioned",
     "pp_RSy_WW_jj1.5tev30k_PU22_uncersioned"
 };
 const char* Mass[6] = {"Control_pp_bulk_WW_jj1.5tev30k_PU22_versioned.root", 
     "Control_pp_bulk_WW_semilep1.5tev30k_PU22_versioned.root",
-    "Control_pp_RSy_ZZ_llj1.5tev30k_PU22_versioned.root",
-    "Control_pp_bulk_ww_semilep_1.5tev30k.root",
-    "Control_pp_bulk_WW_jj1.5tev30k_PU22_uncersioned.root",
-    "Control_pp_RSy_WW_jj1.5tev30k_PU22_uncersioned"
+    "Control_pp_bulk_ZZ_llj1.5tev30k_PU22_versioned.root",
+    "Control_pp_RS_WW_jj1.5tev30k_PU22_versioned.root",
+    "Control_pp_RS_ww_semilep1.5tev30k_PU22_versioned.root",
+    "Control_pp_RSy_WW_jj1.5tev30k_PU22_uncersioned.root"
 };
- double const selections[6] = {0 , 1, 2}; // see cuts.h
+ double const selections[6] = {0 ,1,2,0,1,2}; // see cuts.h
 /////////////////////////////////
 // cuts
 //double weight =1.;///10000;//0.001;//

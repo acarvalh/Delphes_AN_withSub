@@ -80,9 +80,9 @@ int save_hist(int,int,int,bool);
 //namespace po = boost::program_options; // to option in prompt, ble!
 ////////////////////////////////////////////////////
 int main(){
- string path = "/Users/Xanda/Documents/codes/VVcombo/lhe/"; // to loop, to make automatic
+ string path = "/Users/Xanda/Documents/programs/Delphes-3.2.0/Delphes_AN_withSub/lhe/"; // to loop, to make automatic
  string inputfile; string end = ".root";
- for (unsigned i=2 ; i< 3; i++) {
+ for (unsigned i=0 ; i< 5; i++) {
  inputfile= path + file[i] + end;
  cout<<"reading from: "<< inputfile<< endl;
  decla(0);   
@@ -196,7 +196,7 @@ bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPh
         track = (Track*) branchEFlowTrack->At(i);
         particles_pureT = track->P4(); // to undesrtand
         PseudoJet trackTAKE = fastjet::PseudoJet(particles_pureT.Px(),particles_pureT.Py(),particles_pureT.Pz(),particles_pureT.E());
-        if(Lepton.pt()>0)if(trackTAKE.delta_R(Lepton) > 0.8) 
+        //if(Lepton.pt()>0)if(trackTAKE.delta_R(Lepton) > 0.8) 
             particles_pure.push_back(trackTAKE);
     }
     //cout<< branchEFlowTrack->GetEntriesFast()<<" "<<endl;
@@ -245,9 +245,11 @@ bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPh
     //int tau21LP=0,tau21HP=0;
     if(selections[file] == 0 && jets_CA_final.size() >1) { 
         mprunmin = mprunjj_min; mprunmax = mprunjj_max;
+        //mprunmin = 0; mprunmax = 1000;
         if(abs(jets_CA_final.at(0).eta()- jets_CA_final.at(1).eta()) < Deltay && (jets_CA_final.at(0) + jets_CA_final.at(1)).m() > Mvvjj) passcuts = true;
     } else if(selections[file] == 1 && jets_CA_final.size() >0 && nlep ==1 ) { 
          mprunmin = mprunjlnu_min; mprunmax = mprunjlnu_max;
+        //mprunmin = 0; mprunmax = 1000;
         ////////////////////////////////////////////////////////
          //// reco the neutrino
         /////////////////////////////////////////////////////////////
@@ -279,6 +281,7 @@ bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPh
       //////////////////////////////////////////////////////////////
     } else if(selections[file] == 2 && jets_CA_final.size() >0 && nlep ==2 ){
             VV = Lepton2 + Lepton + jets_CA_final.at(0);
+        mprunmin = mprunjll_min; mprunmax = mprunjll_max;
         //cout<<"here"<<endl;
         if( jets_CA_final.at(0).pt() > ptVlnu   && jets_CA_final.at(0).eta() < etaJ) passcuts=true;
     }// close selections
@@ -290,6 +293,7 @@ bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPh
              PseudoJet pruned_jet; double mprun;
              pruned_jet = pruner(jets_CA_final.at(0)); mprun = pruned_jet.m();
              PrunMass->Fill( mprun );
+             if(selections[file] == 0 ) PrunMassSub->Fill(pruner(jets_CA_final.at(1)).m());
              if(selections[file] == 1 ) DRJl->Fill(jets_CA_final.at(0).delta_R(Lepton));
              //
         double tau21; 
@@ -303,7 +307,7 @@ bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPh
              //cout << "tau21 "<<tau21<<endl;
              //jetAll = (Jet*) branchJet->At(0);
              //Float_t tau21true = branchJet->Tau2(); ///jetAll->Tau1();
-             //cout<<" tau21 "<<tau21<<" tau21true "<<tau21true<<endl;
+             //cout<<" tau21 "<<tau21<<endl;
              Nsub->Fill(tau21);
         } else tau21 =-10; // close mprun
         passcuts=false; 
@@ -455,6 +459,7 @@ int save_hist(int isample,int reco,int sample, bool shower){
     Njets_passing_kLooseID->Write();
     Nlep_passing_kLooseID->Write();
     PrunMass->Write();
+    PrunMassSub->Write();
     Nsub->Write();
     Nsubint->Write();
     JJmassHP->Write();
@@ -481,15 +486,21 @@ int decla(int mass){
     
     Nlep_passing_kLooseID = new TH1D("nlep_passing_kLooseID_ct4",  
                                      label, 
-                                     13, -0.5, 12.5);
+                                     7, -0.5, 6.5);
     Nlep_passing_kLooseID->GetYaxis()->SetTitle("");
     Nlep_passing_kLooseID->GetXaxis()->SetTitle("Nleptons after showering"); 
     
     PrunMass = new TH1D("PrunMass_ct4",  
                         label, 
-                        100, 0, 200);
+                        40, 0, 200);
     PrunMass->GetYaxis()->SetTitle("");
     PrunMass->GetXaxis()->SetTitle("Prunned mass leading jet (GeV)"); 
+
+    PrunMassSub = new TH1D("PrunMassSub_ct4",  
+                        label, 
+                        40, 0, 200);
+    PrunMassSub->GetYaxis()->SetTitle("");
+    PrunMassSub->GetXaxis()->SetTitle("Prunned mass sub-leading jet (GeV)"); 
     
     Nsub = new TH1D("Nsub_ct4",  
                     label, 
@@ -529,13 +540,13 @@ int decla(int mass){
     
     JJmassHP = new TH1D("JJmassHP_ct4",  
                       label, 
-                      200, 0, 3000);
+                      50, 0, 3000);
     JJmassHP->GetYaxis()->SetTitle("");
     JJmassHP->GetXaxis()->SetTitle("JJmass (GeV)"); 
 
     JJmassLP = new TH1D("JJmassLP_ct4",  
                       label, 
-                      200, 0, 3000);
+                      50, 0, 3000);
     JJmassLP->GetYaxis()->SetTitle("");
     JJmassLP->GetXaxis()->SetTitle("JJmass (GeV)");     
 

@@ -5,6 +5,7 @@ using namespace std;
 TH1D *Njets_passing_kLooseID;
 TH1D *Nlep_passing_kLooseID;
 TH1D *PrunMass;
+TH1D *PrunMassSub;
 TH1D *Nsub;
 TH1D *JJmassHP;
 TH1D *JJmassLP;
