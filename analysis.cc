@@ -64,7 +64,11 @@ bool findleptons(TClonesArray *branchMissingET ,TClonesArray *branchElectron, TC
 		ExRootTreeReader* treeReader, 
 		bool doHwwselection, TLorentzVector & l1, TLorentzVector & l2); 
 bool findjets(TClonesArray *branchJet,ExRootTreeReader* treeReader);
-bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPhoton, TClonesArray *EFlowNeutralHadron , TClonesArray *branchJet, TClonesArray *branchEFlowMuon,TClonesArray *branchElectron, TClonesArray *branchMuon, TClonesArray *branchMissingET, TClonesArray * branchParticle, int file , int & counterHP , int & counterLP);
+//
+bool myJetCollectionCMS(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPhoton, TClonesArray *EFlowNeutralHadron , TClonesArray *branchJet, TClonesArray *branchEFlowMuon,TClonesArray *branchElectron, TClonesArray *branchMuon, TClonesArray *branchMissingET, TClonesArray * branchParticle, int file , int & counterHP , int & counterLP);
+//
+bool myJetCollectionATLAS(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPhoton, TClonesArray *EFlowNeutralHadron , TClonesArray *branchJet, TClonesArray *branchEFlowMuon,TClonesArray *branchElectron, TClonesArray *branchMuon, TClonesArray *branchMissingET, TClonesArray * branchParticle, int file , int & counterHP , int & counterLP);
+//
 bool isThisJetALepton(TLorentzVector* jet, TLorentzVector* l1, TLorentzVector* l2);
 //////////////////////////////////////////////////////////
 // declare and save histos
@@ -80,9 +84,9 @@ int save_hist(int,int,int,bool);
 //namespace po = boost::program_options; // to option in prompt, ble!
 ////////////////////////////////////////////////////
 int main(){
- string path = "/Users/Xanda/Documents/programs/Delphes-3.2.0/Delphes_AN_withSub/lhe/"; // to loop, to make automatic
+ string path = "/Users/Xanda/Documents/programs/VVcombo_madevent/processed/"; // to loop, to make automatic
  string inputfile; string end = ".root";
- for (unsigned i=0 ; i< 5; i++) {
+ for (unsigned i=0 ; i< 2; i++) {
  inputfile= path + file[i] + end;
  cout<<"reading from: "<< inputfile<< endl;
  decla(0);   
@@ -120,7 +124,12 @@ int main(){
    TLorentzVector l1, l2; // save leptons to compare to jets -- double counted as jets
    //TLorentzVector pho1, pho2; // save to compare to jets
    //std::vector<TLorentzVector> Jets; // all the jets 
-   bool findjetSub = myJetCollection(branchEFlowTrack, brancheflowPhoton, EFlowNeutralHadron , branchJet, branchEFlowMuon,branchElectron, branchMuon, branchMissingET, branchParticle, i, counterHP, counterLP); 
+   bool findjetSub; 
+     //
+   if(selections[i]<3) findjetSub = myJetCollectionCMS(branchEFlowTrack, brancheflowPhoton, EFlowNeutralHadron , branchJet, branchEFlowMuon,branchElectron, branchMuon, branchMissingET, branchParticle, i, counterHP, counterLP); 
+     //
+   if(selections[i]>2) findjetSub = myJetCollectionATLAS(branchEFlowTrack, brancheflowPhoton, EFlowNeutralHadron , branchJet, branchEFlowMuon,branchElectron, branchMuon, branchMissingET, branchParticle, i, counterHP, counterLP);   
+     //
      counterall++;
      //findjetSub = findjets(branchJet, treeReader);
  } // close loop entry
@@ -132,7 +141,7 @@ int main(){
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPhoton, TClonesArray *EFlowNeutralHadron , TClonesArray *branchJet, TClonesArray *branchEFlowMuon ,TClonesArray *branchElectron, TClonesArray *branchMuon , TClonesArray *branchMissingET, TClonesArray * branchParticle , int file , int & counterHP , int & counterLP){
+bool myJetCollectionCMS(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPhoton, TClonesArray *EFlowNeutralHadron , TClonesArray *branchJet, TClonesArray *branchEFlowMuon ,TClonesArray *branchElectron, TClonesArray *branchMuon , TClonesArray *branchMissingET, TClonesArray * branchParticle , int file , int & counterHP , int & counterLP){
     ////////////////////////////////////////////////////
     // pure constituents instead
     // separate the isolated leptons!
@@ -153,7 +162,7 @@ bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPh
     // take MET
     if(nlep==1 && nmu>0 && selections[file] == 1 ) Lepton = Muons.at(0);
     else if(nlep==1 && nel>0 && selections[file] == 1) Lepton = Electrons.at(0);
-    else if(nlep==2 && nmu>1 && selections[file] == 2) {Lepton = Muons.at(0); Lepton2 = Muons.at(0);}
+    else if(nlep==2 && nmu>1 && selections[file] == 2) {Lepton = Muons.at(0); Lepton2 = Muons.at(1);}
     else if(nlep==2 && nel>1 && selections[file] == 2) {Lepton = Electrons.at(0); Lepton2 = Electrons.at(1);}
     if(branchMissingET->GetEntriesFast() > 0 && nlep==1) {
         met   = (MissingET*) branchMissingET->At(0);
@@ -197,20 +206,21 @@ bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPh
         particles_pureT = track->P4(); // to undesrtand
         PseudoJet trackTAKE = fastjet::PseudoJet(particles_pureT.Px(),particles_pureT.Py(),particles_pureT.Pz(),particles_pureT.E());
         //if(Lepton.pt()>0)if(trackTAKE.delta_R(Lepton) > 0.8) 
-            particles_pure.push_back(trackTAKE);
+        particles_pure.push_back(trackTAKE);
     }
     //cout<< branchEFlowTrack->GetEntriesFast()<<" "<<endl;
     //Tower *tower; // P4 returns a TLorentzVector
     for(i = 0; i < brancheflowPhoton->GetEntriesFast(); i++) {
         tower = (Tower*) brancheflowPhoton->At(i);
          particles_pureT = tower->P4(); // to undesrtand
-         if(particles_pureT.Pt() > const_ptmin) particles_pure.push_back(fastjet::PseudoJet(particles_pureT.Px(),particles_pureT.Py(),particles_pureT.Pz(),particles_pureT.E()));
+         particles_pure.push_back(fastjet::PseudoJet(particles_pureT.Px(),particles_pureT.Py(),particles_pureT.Pz(),particles_pureT.E()));
     }
     for(i = 0; i < EFlowNeutralHadron->GetEntriesFast(); i++) {
         // implememnt check iso lepton
         tower = (Tower*) EFlowNeutralHadron->At(i);
         particles_pureT = tower->P4(); // to undesrtand
-        if(particles_pureT.Pt() > const_ptmin) particles_pure.push_back(fastjet::PseudoJet(particles_pureT.Px(),particles_pureT.Py(),particles_pureT.Pz(),particles_pureT.E()));
+        //if(particles_pureT.Pt() > const_ptmin) 
+        particles_pure.push_back(fastjet::PseudoJet(particles_pureT.Px(),particles_pureT.Py(),particles_pureT.Pz(),particles_pureT.E()));
     }    
     /*for(i = 0; i < branchEFlowMuon->GetEntriesFast(); i++) {
         // implememnt check iso lepton
@@ -238,18 +248,18 @@ bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPh
     }
     //cout<<"n isolated lepton removed "<<testnlep<< " njets "<< jets_CA_track.size() <<" njets cleaned "<< jets_CA_final.size()<<endl;
     //cout<<" all jets "<< jets_CA_track.size()<<" non lep = "<<jets_CA_final.size()<<endl;
-    Njets_passing_kLooseID->Fill(jets_CA_final.size(),1);
+    //Njets_passing_kLooseID->Fill(jets_CA_final.size(),1);
     bool passcuts=false;
     double mprunmin,mprunmax, ptv;
     //if(selections[file] == 0 ) cout<<" had!"<<endl;  else   if(selections[file] == 1 )  cout<<" lep!"<<endl; 
     //int tau21LP=0,tau21HP=0;
     if(selections[file] == 0 && jets_CA_final.size() >1) { 
-        mprunmin = mprunjj_min; mprunmax = mprunjj_max;
-        //mprunmin = 0; mprunmax = 1000;
+        //mprunmin = mprunjj_min; mprunmax = mprunjj_max;
+        mprunmin = 0; mprunmax = 1000;
         if(abs(jets_CA_final.at(0).eta()- jets_CA_final.at(1).eta()) < Deltay && (jets_CA_final.at(0) + jets_CA_final.at(1)).m() > Mvvjj) passcuts = true;
     } else if(selections[file] == 1 && jets_CA_final.size() >0 && nlep ==1 ) { 
-         mprunmin = mprunjlnu_min; mprunmax = mprunjlnu_max;
-        //mprunmin = 0; mprunmax = 1000;
+         //mprunmin = mprunjlnu_min; mprunmax = mprunjlnu_max;
+        mprunmin = 0; mprunmax = 1000;
         ////////////////////////////////////////////////////////
          //// reco the neutrino
         /////////////////////////////////////////////////////////////
@@ -281,11 +291,14 @@ bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPh
       //////////////////////////////////////////////////////////////
     } else if(selections[file] == 2 && jets_CA_final.size() >0 && nlep ==2 ){
             VV = Lepton2 + Lepton + jets_CA_final.at(0);
-        mprunmin = mprunjll_min; mprunmax = mprunjll_max;
+        //mprunmin = mprunjll_min; mprunmax = mprunjll_max;
+        mprunmin = 0; mprunmax = 1000;
         //cout<<"here"<<endl;
         if( jets_CA_final.at(0).pt() > ptVlnu   && jets_CA_final.at(0).eta() < etaJ) passcuts=true;
     }// close selections
+    Njets_passing_kLooseID->Fill(jets_CA_final.size(),1);
     if(passcuts){
+             
              //////////////////////////////////////
              // CMS tagger
              //////////////////////////////////////
@@ -294,7 +307,8 @@ bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPh
              pruned_jet = pruner(jets_CA_final.at(0)); mprun = pruned_jet.m();
              PrunMass->Fill( mprun );
              if(selections[file] == 0 ) PrunMassSub->Fill(pruner(jets_CA_final.at(1)).m());
-             if(selections[file] == 1 ) DRJl->Fill(jets_CA_final.at(0).delta_R(Lepton));
+             if(selections[file] == 1 || selections[file] == 2 ) DRJl->Fill(jets_CA_final.at(0).delta_R(Lepton));
+             if(selections[file] == 2 ) DRJlsub->Fill(jets_CA_final.at(0).delta_R(Lepton2));
              //
         double tau21; 
         if( mprun >mprunmin && mprun < mprunmax){
@@ -316,7 +330,6 @@ bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPh
             if(selections[file] == 0 ) JJmassHP->Fill((jets_CA_final.at(0)+jets_CA_final.at(1)).m());
             if(selections[file] > 0 ) { // semilep
                 JJmassHP->Fill(VV.m());
-                
                 //DRJmet->Fill(); -- solve fo the neutrino
             }
         } else if(tau21 > 0.5 && tau21 < 0.75) {
@@ -334,42 +347,247 @@ bool myJetCollection(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPh
             }//close seccond jet
         }// close nsubcuts
     }  
-
+    return true;
+} // close my jet collection CMS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+bool myJetCollectionATLAS(TClonesArray *branchEFlowTrack, TClonesArray *brancheflowPhoton, TClonesArray *EFlowNeutralHadron , TClonesArray *branchJet, TClonesArray *branchEFlowMuon ,TClonesArray *branchElectron, TClonesArray *branchMuon , TClonesArray *branchMissingET, TClonesArray * branchParticle , int file , int & counterHP , int & counterLP){
+    //cout<<"ATLAS"<<endl;
+    ////////////////////////////////////////////////////
+    // pure constituents instead
+    // separate the isolated leptons!
+    TLorentzVector leptonT; double pfmet, pxmet, pymet; PseudoJet Lepton, Lepton2; double metcut=0; 
+    vector<PseudoJet> Muons, Electrons; PseudoJet gen_met_vector; // to do distances
+    for(i = 0; i < branchElectron->GetEntriesFast(); i++) {
+        electron = (Electron*) branchElectron->At(i);
+        leptonT = electron->P4();
+        Electrons.push_back(fastjet::PseudoJet(leptonT.Px(),leptonT.Py(),leptonT.Pz(),leptonT.E())); 
+    }
+    for(i = 0; i < branchMuon->GetEntriesFast(); i++) {
+        muon = (Muon*) branchMuon->At(i);
+        leptonT = muon->P4();
+        Muons.push_back(fastjet::PseudoJet(leptonT.Px(),leptonT.Py(),leptonT.Pz(),leptonT.E())); 
+    }
+    int nmu=Muons.size(); int nel= Electrons.size(); int nlep= nmu +nel;
+    Nlep_passing_kLooseID->Fill(nlep,1);
+    // take MET
+    if(nlep==1 && nmu>0 && selections[file] == 1 ) Lepton = Muons.at(0);
+    else if(nlep==1 && nel>0 && selections[file] == 1) Lepton = Electrons.at(0);
+    else if(nlep==2 && nmu>1 && selections[file] == 2) {Lepton = Muons.at(0); Lepton2 = Muons.at(1);}
+    else if(nlep==2 && nel>1 && selections[file] == 2) {Lepton = Electrons.at(0); Lepton2 = Electrons.at(1);}
+    if(branchMissingET->GetEntriesFast() > 0 && nlep==1) {
+        met   = (MissingET*) branchMissingET->At(0);
+        pfmet = met->MET;
+        double etamet = met->Eta;
+        double phimet = met->Phi;
+        
+        pxmet = pfmet*(TMath::Cos(phimet));
+        pymet = pfmet*(TMath::Sin(phimet));
+        //gen_met_vector = fastjet::PseudoJet(leptonT.Px(),leptonT.Py(),leptonT.Pz(),leptonT.E()); // colinear
+    } else pfmet =-100;
+    // take the neutrino
+    int countNeu=1;
+    /*if(Muons.size() ==0 && Electrons.at(0).pt() > ptE && Electrons.at(0).eta() < etaE) 
+     {metcut= METenuJ; Lepton = Electrons.at(0);}
+     else if(Electrons.size() ==0 && Muons.at(0).pt() > ptMu && Muons.at(0).eta() < etaMu ) 
+     {metcut = METmunuJ;  Lepton = Muons.at(0);} 
+     else metcut = 10000;// = lepton veto
+     */
+    /*    for(int iPart = 0; iPart < branchParticle->GetEntriesFast(); iPart++){
+     particle = (GenParticle*) branchParticle->At(i);
+     int pdgCode = TMath::Abs(particle->PID);
+     int IsPU = particle->IsPU;
+     int status = particle->Status;
+     if(IsPU == 0 && (pdgCode == 12 || pdgCode == 14 || pdgCode == 16) )cout<<"all "<<branchParticle->GetEntriesFast() <<" status "<< status<< " pdgid "<< pdgCode<<endl;
+     if (IsPU == 0 && status == 2 && (pdgCode == 12 || pdgCode == 14 || pdgCode == 16) ) {
+     gen_met_vectorT = gen_met_vectorT + particle->P4(); countNeu++;
+     }
+     }
+     if(countNeu>0) gen_met_vector = fastjet::PseudoJet(gen_met_vectorT.Px(),gen_met_vectorT.Py(),gen_met_vectorT.Pz(),gen_met_vectorT.E());
+     */
+    PseudoJet VV;
+    //////////////////////////////////////////////////////
+    vector<PseudoJet> particles_pure;
+    TLorentzVector particles_pureT;
+    //cout<<" all tracks "<< branchEFlowTrack->GetEntriesFast() << endl; // check with isol leptons
+    //Track *track; // P4 returns a TLorentzVector
+    for(i = 0; i < branchEFlowTrack->GetEntriesFast(); i++) {
+        // implememnt check iso lepton
+        track = (Track*) branchEFlowTrack->At(i);
+        particles_pureT = track->P4(); // to undesrtand
+        PseudoJet trackTAKE = fastjet::PseudoJet(particles_pureT.Px(),particles_pureT.Py(),particles_pureT.Pz(),particles_pureT.E());
+        //if(Lepton.pt()>0)if(trackTAKE.delta_R(Lepton) > 0.8) 
+        particles_pure.push_back(trackTAKE);
+        particles_pure.at(i).set_user_index(1); // 1 = track , 0 = not a track
+    }
+    //cout<< branchEFlowTrack->GetEntriesFast()<<" "<<endl;
+    //Tower *tower; // P4 returns a TLorentzVector
+    for(i = 0; i < brancheflowPhoton->GetEntriesFast(); i++) {
+        tower = (Tower*) brancheflowPhoton->At(i);
+        particles_pureT = tower->P4(); // to undesrtand
+        particles_pure.push_back(fastjet::PseudoJet(particles_pureT.Px(),particles_pureT.Py(),particles_pureT.Pz(),particles_pureT.E()));
+        particles_pure.at(i).set_user_index(1); // 1 = track , 0 = not a track
+    }
+    for(i = 0; i < EFlowNeutralHadron->GetEntriesFast(); i++) {
+        // implememnt check iso lepton
+        tower = (Tower*) EFlowNeutralHadron->At(i);
+        particles_pureT = tower->P4(); // to undesrtand
+        particles_pure.push_back(fastjet::PseudoJet(particles_pureT.Px(),particles_pureT.Py(),particles_pureT.Pz(),particles_pureT.E()));
+        particles_pure.at(i).set_user_index(1); // 1 = track , 0 = not a track
+    }    
+    /*for(i = 0; i < branchEFlowMuon->GetEntriesFast(); i++) {
+     // implememnt check iso lepton
+     tower = (Tower*) branchEFlowMuon->At(i);
+     particles_pureT = tower->P4(); // to undesrtand
+     if(particles_pureT.Pt() > const_ptmin) 
+     particles_pure.push_back(fastjet::PseudoJet(particles_pureT.Px(),particles_pureT.Py(),particles_pureT.Pz(),particles_pureT.E()));
+     }*/
+    // do the jet
+    vector<PseudoJet> jets_CA_track;
+    JetDefinition  CA(cambridge_algorithm, R0A); 
+    ClusterSequence cs_ca_track(particles_pure, CA);
+    Selector jet_selector = SelectorPtMin(jet_ptmin) && SelectorAbsRapMax(rapmax); // put baseline here
+    jets_CA_track = sorted_by_pt(jet_selector(cs_ca_track.inclusive_jets())); // first we do akt jets from particles
+    // is this jet a lepton?
+    vector<PseudoJet> jets_CA_final; //cout<<" wrong! 3 "<<Muons.size()<<" "<< Electrons.size()<<endl;
+    int testnlep=0;
+    for (unsigned j = 0; j<jets_CA_track.size(); j++ ) {    
+        bool notLep = true;
+        //if(Muons.size()>0)for (unsigned i = 0; i<Muons.size(); i++ ) if (jets_CA_track.at(j).delta_R(Muons.at(i)) < lepiso) notLep = false;
+        //if(Electrons.size()>0)for (unsigned l = 0; l<Electrons.size(); l++ ) if (jets_CA_track.at(j).delta_R(Electrons.at(l)) < lepiso) notLep = false;
+        if (jets_CA_track.at(j).delta_R(Lepton) < lepiso) notLep = false;
+        if(selections[file] == 2) if (jets_CA_track.at(j).delta_R(Lepton2) < lepiso) notLep = false;
+        if(notLep) jets_CA_final.push_back(jets_CA_track.at(j)); else testnlep++;
+    }
+    //cout<<"n isolated lepton removed "<<testnlep<< " njets "<< jets_CA_track.size() <<" njets cleaned "<< jets_CA_final.size()<<endl;
+    //cout<<" all jets "<< jets_CA_track.size()<<" non lep = "<<jets_CA_final.size()<<endl;
+    //Njets_passing_kLooseID->Fill(jets_CA_final.size(),1);
+    bool passcuts=false;
+    double mprunmin,mprunmax, ptv;
+    //if(selections[file] == 0 ) cout<<" had!"<<endl;  else   if(selections[file] == 1 )  cout<<" lep!"<<endl; 
+    //int tau21LP=0,tau21HP=0;
+    if(selections[file] == 3 && jets_CA_final.size() >1) { 
+        //mprunmin = mprunjj_min; mprunmax = mprunjj_max;
+        mprunmin = 0; mprunmax = 1000;
+        if(abs(jets_CA_final.at(0).eta()- jets_CA_final.at(1).eta()) < Deltay && (jets_CA_final.at(0) + jets_CA_final.at(1)).m() > Mvvjj) passcuts = true;
+    } else if(selections[file] == 4 && jets_CA_final.size() >0 && nlep ==1 ) { 
+        //mprunmin = mprunjlnu_min; mprunmax = mprunjlnu_max;
+        mprunmin = 0; mprunmax = 1000;
+        ////////////////////////////////////////////////////////
+        //// reco the neutrino
+        /////////////////////////////////////////////////////////////
+        double wt = (Lepton.px()*pxmet) + (Lepton.py()*pymet);
+        double mu = (pow(wmass,2)/2 + wt);
+        double aw = (pow(Lepton.pz(),2)-pow(Lepton.e(),2));
+        double bw = 2*mu*Lepton.pz();
+        double cw = pow(mu,2)-pow(Lepton.e(),2)*pow(pfmet,2);
+        double discriminant = pow(bw,2) - 4*aw*cw ; 
+        double pnuz;//,recowm,recowpt,recoweta,recowphi;  
+        PseudoJet lepW; 
+        if(discriminant>=0){
+            //recotruth=1; 
+            double pznu1 = (-bw - sqrt(discriminant))/(2*aw);
+            double pznu2 = (-bw + sqrt(discriminant))/(2*aw);
+            //cout<<"pz1 "<<pznu1 << " pz2 " <<pznu2 <<" pz "<<neutrinos.at(0).pz()<<" pzl "<<leptons.at(0).pz()<<endl;
+            //cout<<"dumb "<< (neutrinos.at(0)+leptons.at(0)).m() << " calculated " <<
+            //sqrt(pow(leptons.at(0).e()+neutrinos.at(0).e(),2)-wt-pow(leptons.at(0).pz()+neutrinos.at(0).pz(),2))
+            //  <<endl;
+            pnuz=TMath::Min(pznu1,pznu2); 
+            double enu = sqrt(pow(pxmet,2)+pow(pymet,2)+pow(pnuz,2));
+            double pxnu=pxmet,pynu=pymet;
+            lepW = Lepton+ fastjet::PseudoJet(pxnu,pynu,pnuz,enu);
+            VV = lepW + jets_CA_final.at(0);
+            //cout << lepW.m()<< " "<< VV.m()<<endl;
+            if( jets_CA_final.at(0).pt() > ptVlnu && pfmet > metcut  && jets_CA_final.at(0).eta() < etaJ) passcuts=true; // && VV.m() > Mvvlnuj
+        } // close reco the neutrino
+        
+        //////////////////////////////////////////////////////////////
+    } else if(selections[file] == 5 && jets_CA_final.size() >0 && nlep ==2 ){
+        VV = Lepton2 + Lepton + jets_CA_final.at(0);
+        //mprunmin = mprunjll_min; mprunmax = mprunjll_max;
+        mprunmin = 0; mprunmax = 1000;
+        //cout<<"here"<<endl;
+        if( jets_CA_final.at(0).pt() > ptVlnu   && jets_CA_final.at(0).eta() < etaJ) passcuts=true;
+    }// close selections
+    //////////////////////////////////////////////
+    if(passcuts){
+        //////////////////////////////////////
+        // ATLAS tagger
+        //////////////////////////////////////
+        // filtering -- groomed mass
+        double mprun;
+        Filter filter(JetDefinition(cambridge_algorithm, 0.2), SelectorNHardest(3));
+        PseudoJet groomed_jet = filter(jets_CA_final.at(0)); mprun = groomed_jet.m();
+        PrunMass->Fill( mprun );
+        //cout<<mprun<<endl;
+        // the result is a composite jet... take it to make y-variable
+        //vector<PseudoJet> subconstituents = groomed_jet.constituents(); 
+        vector<PseudoJet> kept_subjets = sorted_by_pt(groomed_jet.pieces());
+        double sqrt_y = -1;
+        if(kept_subjets.size()>1) sqrt_y = TMath::Min(kept_subjets.at(0).pt(),kept_subjets.at(1).pt())*(kept_subjets.at(0).delta_R(kept_subjets.at(1)))/(jets_CA_final.at(0).m());
+        Yvar->Fill(sqrt_y);
+        // a little extra accessed using structure of<>
+        //vector<PseudoJet> rejected subjets = groomed jet.structure of<Filter>().rejected();
+        /////////////////////////////////////
+        // ntracks - count tracks in the jet
+        int ntrack =0;
+        for(unsigned j = 0; j<jets_CA_final.at(0).constituents().size(); j++ ) if(jets_CA_final.at(0).constituents().at(j).user_index() ==1) ntrack++;
+        Nconstitu->Fill(ntrack);
+        /////////////////////////////////////
+        // mass drop
+        // now run mass drop tagger / compare the hardest core with the rest of the jet
+        //MassDropTagger md_tagger(mu, ycut); // define the cut on mass drop
+        //PseudoJet tagged_jet  = md_tagger(jets_CA_final)[0]; // save to check if survives mass drop .. different !    
+        //if(tagged_jet.m() > 10) {std::cout<<"tag!"<<std::endl; }
+        /////////////////////////////////////
+        // mass - fill HP
+        if(selections[file] == 3 )  JJmassHP->Fill((jets_CA_final.at(0)+jets_CA_final.at(1)).m());
+        if(selections[file] == 4 ) DRJl->Fill(jets_CA_final.at(0).delta_R(Lepton));
+        if(selections[file] > 3 ) JJmassHP->Fill(VV.m());
+        //
+        J1eta->Fill(jets_CA_final.at(0).eta());
+        J1pt->Fill(jets_CA_final.at(0).pt());
+        if(selections[file] == 3 ){ 
+            DetaJJ->Fill(abs(jets_CA_final.at(0).eta()- jets_CA_final.at(1).eta()));
+            J2eta->Fill(jets_CA_final.at(1).eta());
+            J2pt->Fill(jets_CA_final.at(1).pt());
+        }//close seccond jet
+    }  // close passcut
+    
     
     /* if(some>0) {
-        // define CA jet in the Delphes card
-        // ATLAS TAG
-        fastjet::PseudoJet teste = particles[0];
-        //std::cout<<"the hardest core! "<<teste<<std::endl;
-        //fastjet::Selector jet_selector = fastjet::SelectorPtMin(MINPTJET) && fastjet::SelectorAbsRapMax(rapmax);
-        //fastjet::JetDefinition akt(antikt_algorithm, jetR);
-        //fastjet::ClusterSequence cs_akt(particles, akt);
-        //std::vector<PseudoJet> jets_akt;
-        //jets_akt = sorted_by_pt(jet_selector(cs_akt.inclusive_jets()));
-        // jet definition for substructure
-        fastjet::JetDefinition CA10(fastjet::cambridge_algorithm, Rsb);
-        // first recluster with some large CA (needed for mass-drop)
-        fastjet::ClusterSequence cs_tmp(particles, CA10);
-        // next get hardest jet -- it is already sorted by pt
-        std::vector<fastjet::PseudoJet> ca_jet;
-        ca_jet = fastjet::sorted_by_pt(cs_tmp.inclusive_jets()); // find the cores
-        //if(ca_jet[0].pt()>0)std::cout<<"the hardest core! "<<ca_jet[0].pt()<<std::endl;
-        // now run mass drop tagger / compare the hardest core with the rest of the jet
-        fastjet::MassDropTagger md_tagger(mu, ycut); // define the cut on mass drop
-        // mu: ratio in between mass of cores, symetric splitting
-        fastjet::PseudoJet tagged_jet  = md_tagger(ca_jet)[0]; // save to check if survives mass drop .. different !
-        //tagged_jet = md_tagger(ca_jet);
-        //if(tagged_jet.m() > 110) {std::cout<<"tag!"<<std::endl; return true;} else return false;
-        // Filter definition to improve mass resolution // after
-        //Filter filter(JetDefinition(cambridge_algorithm, Rfilt), SelectorNHardest(n_subjet));
-        //JetDefinition akt(antikt_algorithm, jetR);
-        //ClusterSequence cs_akt(particles, akt);
-        //
-    } else return false;
-    */
+     // define CA jet in the Delphes card
+     // ATLAS TAG
+     fastjet::PseudoJet teste = particles[0];
+     //std::cout<<"the hardest core! "<<teste<<std::endl;
+     //fastjet::Selector jet_selector = fastjet::SelectorPtMin(MINPTJET) && fastjet::SelectorAbsRapMax(rapmax);
+     //fastjet::JetDefinition akt(antikt_algorithm, jetR);
+     //fastjet::ClusterSequence cs_akt(particles, akt);
+     //std::vector<PseudoJet> jets_akt;
+     //jets_akt = sorted_by_pt(jet_selector(cs_akt.inclusive_jets()));
+     // jet definition for substructure
+     fastjet::JetDefinition CA10(fastjet::cambridge_algorithm, Rsb);
+     // first recluster with some large CA (needed for mass-drop)
+     fastjet::ClusterSequence cs_tmp(particles, CA10);
+     // next get hardest jet -- it is already sorted by pt
+     std::vector<fastjet::PseudoJet> ca_jet;
+     ca_jet = fastjet::sorted_by_pt(cs_tmp.inclusive_jets()); // find the cores
+     //if(ca_jet[0].pt()>0)std::cout<<"the hardest core! "<<ca_jet[0].pt()<<std::endl;
+     // now run mass drop tagger / compare the hardest core with the rest of the jet
+     fastjet::MassDropTagger md_tagger(mu, ycut); // define the cut on mass drop
+     // mu: ratio in between mass of cores, symetric splitting
+     fastjet::PseudoJet tagged_jet  = md_tagger(ca_jet)[0]; // save to check if survives mass drop .. different !
+     //tagged_jet = md_tagger(ca_jet);
+     //if(tagged_jet.m() > 110) {std::cout<<"tag!"<<std::endl; return true;} else return false;
+     // Filter definition to improve mass resolution // after
+     //Filter filter(JetDefinition(cambridge_algorithm, Rfilt), SelectorNHardest(n_subjet));
+     //JetDefinition akt(antikt_algorithm, jetR);
+     //ClusterSequence cs_akt(particles, akt);
+     //
+     } else return false;
+     */
     //cout<<" total particles in the event"<< some<< endl;
     return true;
-} // close my jet collection
+} // close my jet collection ATLAS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool findjets(TClonesArray *branchJet,ExRootTreeReader* treeReader){ 
     Jet *jet; // P4 returns a TLorentzVector
@@ -458,6 +676,8 @@ int save_hist(int isample,int reco,int sample, bool shower){
     f1->cd();
     Njets_passing_kLooseID->Write();
     Nlep_passing_kLooseID->Write();
+    Nconstitu->Write();
+    Yvar->Write();
     PrunMass->Write();
     PrunMassSub->Write();
     Nsub->Write();
@@ -470,6 +690,7 @@ int save_hist(int isample,int reco,int sample, bool shower){
     J1pt->Write();
     J2pt->Write();
     DRJl->Write();
+    DRJlsub->Write();
     f1->Close();    
     return 0;
 }
@@ -489,6 +710,18 @@ int decla(int mass){
                                      7, -0.5, 6.5);
     Nlep_passing_kLooseID->GetYaxis()->SetTitle("");
     Nlep_passing_kLooseID->GetXaxis()->SetTitle("Nleptons after showering"); 
+
+    Nconstitu = new TH1D("nconstitu",  
+                                      label, 
+                                      121, -0.5, 120.5);
+    Nconstitu->GetYaxis()->SetTitle("");
+    Nconstitu->GetXaxis()->SetTitle("N_{constituents}");     
+
+    Yvar = new TH1D("Yvar",  
+                         label, 
+                         40, -1, 1.0);
+    Yvar->GetYaxis()->SetTitle("");
+    Yvar->GetXaxis()->SetTitle("#sqrt(y)");  
     
     PrunMass = new TH1D("PrunMass_ct4",  
                         label, 
@@ -554,8 +787,14 @@ int decla(int mass){
                         label, 
                         100, 0, 20);
     DRJl->GetYaxis()->SetTitle("");
-    DRJl->GetXaxis()->SetTitle("DR(Jl) (GeV)");  
+    DRJl->GetXaxis()->SetTitle("DR(Jl)");  
 
+    DRJlsub = new TH1D("DRJlsub_ct4",  
+                    label, 
+                    100, 0, 20);
+    DRJlsub->GetYaxis()->SetTitle("");
+    DRJlsub->GetXaxis()->SetTitle("DR(Jl) sub");  
+    
     DRJmet = new TH1D("DRJmet_ct4",  
                     label, 
                     100, 0, 20);
