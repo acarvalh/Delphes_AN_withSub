@@ -1,22 +1,30 @@
 /////////////////////////////////
-const int nfiles=6; 
+const int nfiles=8; 
 // selections: 0 = CMS JJ ; 1 = CMS Jlnu ; 2 = CMS Jll 
 // selections: 3 = ATLAS JJ ; 4 = ATLAS Jlnu ; 5 = ATLAS Jll 
-string file[6] = {"bulk/pp_bulk_WW_jj1.5tev30k_PU22_versioned", 
+
+string file[8] = {
+    "bulk/pp_bulk_WW_jj1.5tev30k_PU22_versioned", 
+    "bulk/pp_bulk_ZZ_jj1.5tev20k_PU22_versioned", 
     "bulk/pp_bulk_WW_semilep1.5tev30k_PU22_versioned",
     "bulk/pp_bulk_ZZ_llj1.5tev30k_PU22_versioned",
-    "RS/pp_RS_WW_jj1.5tev30k_PU22_versioned",
-    "RS/pp_RS_ww_semilep1.5tev30k_PU22_versioned",
-    "pp_RSy_WW_jj1.5tev30k_PU22_uncersioned"
+    "RS/pp_RS_WW_jj1.5tev20k_PU22_versioned",
+    "RS/pp_RS_ZZ_jj1.5tev20k_PU22_versioned",
+    "RS/pp_RS_WW_jlnu1.5tev20k_PU22_versioned",    
+    "RS/pp_RS_ZZ_jll1.5tev20k_PU22_versioned"
 };
-const char* Mass[6] = {"Control_pp_bulk_WW_jj1.5tev30k_PU22_versioned.root", 
+const char* Mass[8] = {
+    "Control_pp_bulk_WW_jj1.5tev30k_PU22_versioned.root", 
+    "Control_pp_bulk_ZZ_jj1.5tev20k_PU22_versioned.root", 
     "Control_pp_bulk_WW_semilep1.5tev30k_PU22_versioned.root",
     "Control_pp_bulk_ZZ_llj1.5tev30k_PU22_versioned.root",
-    "Control_pp_RS_WW_jj1.5tev30k_PU22_versioned.root",
-    "Control_pp_RS_ww_semilep1.5tev30k_PU22_versioned.root",
-    "Control_pp_RSy_WW_jj1.5tev30k_PU22_uncersioned.root"
+    "Control_pp_RS_WW_jj1.5tev20k_PU22_versioned.root",
+    "Control_pp_RS_ZZ_jj1.5tev20k_PU22_versioned.root",
+    "Control_pp_RS_WW_jlnu1.5tev20k_PU22_versioned.root",    
+    "Control_pp_RS_ZZ_jll1.5tev20k_PU22_versioned.root"
 };
- double const selections[6] = {0 ,1,2,0,1,2}; // see cuts.h
+// double const selections[6] = {0 ,1,2,0,1,2}; // see cuts.h
+ double const selections[8] = {3,3 ,4,5,0,0,1,2}; // see cuts.h
 /////////////////////////////////
 // cuts
 //double weight =1.;///10000;//0.001;//
@@ -51,6 +59,7 @@ double const Mvvllj =500;//400;
 double const ptVll = 80; 
 ///////////////////////////////////
 // for substructure
+// CMS
 // nsubjetiness - unnormalized measure
 double const beta1 = 1.0;
 double const R0=0.8; 
@@ -68,14 +77,17 @@ double const mprunjlnu_max = 105;
 //
 double const mprunjll_min = 70;
 double const mprunjll_max = 110;
+//////////////////////////////
 // mass drop
-double const Rsb = 0.8; // CA recluster
-double const mu = 0.67;
-double const ycut = 0.09;
-double const Mfat =100;
+// ATLAS
+double const R0A=1.2; 
+double const Rr = 0.3; // CA recluster
+double const mu = 1;//0.67; // mu: ratio in between mass of cores, symetric splitting
+double const ycut = 0.04 ;// 0.09;
+double const nf =3; // n subjets after filtering
 //
-double const Rfilt = 0.1;
-int const n_subjet =3;
+//double const Rfilt = 0.1;
+//int const n_subjet =3;
 //
 /////////////////////////////////////////
 // smear
