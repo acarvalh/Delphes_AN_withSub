@@ -240,12 +240,18 @@ bool myJetCollectionCMS(TClonesArray *branchEFlowTrack, TClonesArray *brancheflo
     // is this jet a lepton?
     vector<PseudoJet> jets_CA_final; //cout<<" wrong! 3 "<<Muons.size()<<" "<< Electrons.size()<<endl;
     int testnlep=0;
+    
+    
+    /// You want to make absolutely sure that your jets are well-separated from your leptons.
     for (unsigned j = 0; j<jets_CA_track.size(); j++ ) {    
         bool notLep = true;
         //if(Muons.size()>0)for (unsigned i = 0; i<Muons.size(); i++ ) if (jets_CA_track.at(j).delta_R(Muons.at(i)) < lepiso) notLep = false;
         //if(Electrons.size()>0)for (unsigned l = 0; l<Electrons.size(); l++ ) if (jets_CA_track.at(j).delta_R(Electrons.at(l)) < lepiso) notLep = false;
-        if (jets_CA_track.at(j).delta_R(Lepton) < lepiso) notLep = false;
-        if(selections[file] == 2) if (jets_CA_track.at(j).delta_R(Lepton2) < lepiso) notLep = false;
+        for (unsigned ll=0; ll!=Leptons.size(); ++ll) {
+		PseudoJet theLepton = Leptons.at(ll);
+        	if (jets_CA_track.at(j).delta_R(theLepton) < lepiso) notLep = false;
+	       	//if(selections[file] == 2) if (jets_CA_track.at(j).delta_R(Lepton2) < lepiso) notLep = false;
+	}
         if(notLep && jets_CA_track.at(j).pt() > 200 && jets_CA_track.at(j).eta() < 2.4) jets_CA_final.push_back(jets_CA_track.at(j)); else testnlep++;
     }
     //cout<<"n isolated lepton removed "<<testnlep<< " njets "<< jets_CA_track.size() <<" njets cleaned "<< jets_CA_final.size()<<endl;
