@@ -146,18 +146,20 @@ bool myJetCollectionCMS(TClonesArray *branchEFlowTrack, TClonesArray *brancheflo
     // pure constituents instead
     // separate the isolated leptons!
     TLorentzVector leptonT; double pfmet, pxmet, pymet; PseudoJet Lepton, Lepton2; double metcut=0; 
-    vector<PseudoJet> Muons, Electrons; PseudoJet gen_met_vector; // to do distances
+    vector<PseudoJet> Muons, Electrons, Leptons; PseudoJet gen_met_vector; // to do distances
     for(i = 0; i < branchElectron->GetEntriesFast(); i++) {
         electron = (Electron*) branchElectron->At(i);
         leptonT = electron->P4();
         Electrons.push_back(fastjet::PseudoJet(leptonT.Px(),leptonT.Py(),leptonT.Pz(),leptonT.E())); 
+        Leptons.push_back(fastjet::PseudoJet(leptonT.Px(),leptonT.Py(),leptonT.Pz(),leptonT.E())); 
     }
     for(i = 0; i < branchMuon->GetEntriesFast(); i++) {
         muon = (Muon*) branchMuon->At(i);
         leptonT = muon->P4();
         Muons.push_back(fastjet::PseudoJet(leptonT.Px(),leptonT.Py(),leptonT.Pz(),leptonT.E())); 
+	Leptons.push_back(fastjet::PseudoJet(leptonT.Px(),leptonT.Py(),leptonT.Pz(),leptonT.E())); 
     }
-    int nmu=Muons.size(); int nel= Electrons.size(); int nlep= nmu +nel;
+    int nmu=Muons.size(); int nel= Electrons.size(); int nlep=Leptons.size();
     Nlep_passing_kLooseID->Fill(nlep,1);
     // take MET
     if(nlep==1 && nmu>0 && selections[file] == 1 ) Lepton = Muons.at(0);
