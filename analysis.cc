@@ -244,7 +244,7 @@ bool myJetCollectionCMS(TClonesArray *branchEFlowTrack, TClonesArray *brancheflo
         //if(Electrons.size()>0)for (unsigned l = 0; l<Electrons.size(); l++ ) if (jets_CA_track.at(j).delta_R(Electrons.at(l)) < lepiso) notLep = false;
         if (jets_CA_track.at(j).delta_R(Lepton) < lepiso) notLep = false;
         if(selections[file] == 2) if (jets_CA_track.at(j).delta_R(Lepton2) < lepiso) notLep = false;
-        if(notLep) jets_CA_final.push_back(jets_CA_track.at(j)); else testnlep++;
+        if(notLep && jets_CA_track.at(j).pt() > 200 && jets_CA_track.at(j).eta() < 2.4) jets_CA_final.push_back(jets_CA_track.at(j)); else testnlep++;
     }
     //cout<<"n isolated lepton removed "<<testnlep<< " njets "<< jets_CA_track.size() <<" njets cleaned "<< jets_CA_final.size()<<endl;
     //cout<<" all jets "<< jets_CA_track.size()<<" non lep = "<<jets_CA_final.size()<<endl;
@@ -256,7 +256,10 @@ bool myJetCollectionCMS(TClonesArray *branchEFlowTrack, TClonesArray *brancheflo
     if(selections[file] == 0 && jets_CA_final.size() >1) { 
         //mprunmin = mprunjj_min; mprunmax = mprunjj_max;
         mprunmin = 0; mprunmax = 1000;
-        if(abs(jets_CA_final.at(0).eta()- jets_CA_final.at(1).eta()) < Deltay && (jets_CA_final.at(0) + jets_CA_final.at(1)).m() > Mvvjj) passcuts = true;
+        if(
+           abs(jets_CA_final.at(0).eta()- jets_CA_final.at(1).eta()) < Deltay 
+           && (jets_CA_final.at(0) + jets_CA_final.at(1)).m() > Mvvjj
+           ) passcuts = true;
     } else if(selections[file] == 1 && jets_CA_final.size() >0 && nlep ==1 ) { 
          //mprunmin = mprunjlnu_min; mprunmax = mprunjlnu_max;
         mprunmin = 0; mprunmax = 1000;

@@ -24,7 +24,7 @@ const char* Mass[8] = {
     "Control_pp_RS_ZZ_jll1.5tev20k_PU22_versioned.root"
 };
 // double const selections[6] = {0 ,1,2,0,1,2}; // see cuts.h
- double const selections[8] = {3,3 ,4,5,0,0,1,2}; // see cuts.h
+ double const selections[8] = {0,0 ,4,5,0,0,1,2}; // see cuts.h
 /////////////////////////////////
 // cuts
 //double weight =1.;///10000;//0.001;//
